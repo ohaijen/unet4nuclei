@@ -136,15 +136,15 @@ def random_sample_generator(x_big_dir, y_big_dir, batch_size, bit_depth, dim1, d
     if(debug):
         fig = plt.figure()
         plt.hist(y_big.flatten())
-        plt.savefig('/home/jr0th/github/segmentation/code/generated/y_hist')
+        plt.savefig('y_hist')
         plt.close(fig)
 
         fig = plt.figure()
         plt.hist(x_big.flatten())
-        plt.savefig('/home/jr0th/github/segmentation/code/generated/x_hist')
+        plt.savefig('x_hist')
         plt.close(fig)
     
-    # get dimensions right – understand data set
+    # get dimensions right -- understand data set
     n_images = x_big.shape[0]
     dim1_size = x_big.shape[1]
     dim2_size = x_big.shape[2]

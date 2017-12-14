@@ -1,3 +1,3 @@
-# U-net for segmentation of nuclei in fluorescence microscopy images.
+# U-net for segmentation of nuclei in fluorescence microscopy
 
 
