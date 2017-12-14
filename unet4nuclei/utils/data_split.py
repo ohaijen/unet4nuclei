@@ -1,3 +1,6 @@
+import os
+import random 
+
 def create_image_lists(dir_raw_images, fraction_train = 0.5, fraction_validation = 0.25):
     file_list = os.listdir(dir_raw_images)
 
