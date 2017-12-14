@@ -1,6 +1,6 @@
 import keras.callbacks
 
-import helper.metrics
+import utils.metrics
 
 import tensorflow as tf
 import pandas as pd
@@ -48,8 +48,8 @@ class SplitsAndMergesLogger3Class(keras.callbacks.TensorBoard):
         y_model_probmap_batch = self.model.predict_on_batch(x_batch)
 
         # get predictions from probmaps
-        y_model_pred_batch = helper.metrics.probmap_to_pred(y_model_probmap_batch, boundary_boost_factor)
-        y_gt_pred_batch = helper.metrics.probmap_to_pred(y_batch, boundary_boost_factor)
+        y_model_pred_batch = utils.metrics.probmap_to_pred(y_model_probmap_batch, boundary_boost_factor)
+        y_gt_pred_batch = utils.metrics.probmap_to_pred(y_batch, boundary_boost_factor)
 
         # buffer for all results
         results = np.empty(shape = (0, 3), dtype = np.float16)        
@@ -62,7 +62,7 @@ class SplitsAndMergesLogger3Class(keras.callbacks.TensorBoard):
             y_gt_pred = y_gt_pred_batch[index]
 
             # calculate and save error
-            result = helper.metrics.splits_and_merges_3_class(y_model_pred, y_gt_pred)
+            result = utils.metrics.splits_and_merges_3_class(y_model_pred, y_gt_pred)
             results = np.vstack((results, result))
         
         return results
@@ -146,7 +146,7 @@ class SplitsAndMergesLoggerBoundary(keras.callbacks.TensorBoard):
         y_model_probmap_batch = self.model.predict_on_batch(x_batch)
 
         # get contour from probmaps
-        y_model_contour_batch = helper.metrics.probmap_to_contour(y_model_probmap_batch)
+        y_model_contour_batch = utils.metrics.probmap_to_contour(y_model_probmap_batch)
 
         # buffer for all results
         results = np.empty(shape = (0, 3), dtype = np.float16)        
@@ -160,7 +160,7 @@ class SplitsAndMergesLoggerBoundary(keras.callbacks.TensorBoard):
             y_gt_contour = y_gt_contour_batch[index]
 
             # calculate and save error
-            result = helper.metrics.splits_and_merges_boundary(y_model_contour, y_gt_contour, x_image)
+            result = utils.metrics.splits_and_merges_boundary(y_model_contour, y_gt_contour, x_image)
             results = np.vstack((results, result))
         
         return results
