@@ -5,22 +5,28 @@ import keras.backend as K
 
 debug = False
 
-def precision(y_true, y_pred):
-    # taken from Keras 1
-    true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
-    predicted_positives = K.sum(K.round(K.clip(y_pred, 0, 1)))
-    precision = true_positives / (predicted_positives + K.epsilon())
+def channel_precision(channel, name):
+    def precision_func(y_true, y_pred):
+        # taken from Keras 1
+        true_positives = K.sum(K.round(K.clip(y_true[:,:,:,channel] * y_pred[:,:,:,channel], 0, 1)))
+        predicted_positives = K.sum(K.round(K.clip(y_pred[:,:,:,channel], 0, 1)))
+        precision = true_positives / (predicted_positives + K.epsilon())
     
-    return precision
+        return precision
+    precision_func.__name__ = name
+    return precision_func
 
 
-def recall(y_true, y_pred):
-    # taken from Keras 1
-    true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
-    possible_positives = K.sum(K.round(K.clip(y_true, 0, 1)))
-    recall = true_positives / (possible_positives + K.epsilon())
+def channel_recall(channel, name):
+    def recall_func(y_true, y_pred, channel=0):
+        # taken from Keras 1
+        true_positives = K.sum(K.round(K.clip(y_true[:,:,:,channel] * y_pred[:,:,:,channel], 0, 1)))
+        possible_positives = K.sum(K.round(K.clip(y_true[:,:,:,channel], 0, 1)))
+        recall = true_positives / (possible_positives + K.epsilon())
     
-    return recall
+        return recall
+    recall_func.__name__ = name
+    return recall_func
 
 
 ## PROBMAP TO CONTOURS TO LABEL
