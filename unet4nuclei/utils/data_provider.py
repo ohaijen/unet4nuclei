@@ -174,8 +174,8 @@ def random_sample_generator(x_big_dir, y_big_dir, batch_size, bit_depth, dim1, d
             img_index = np.random.randint(low=0, high=n_images)
             
             # get random crop
-            start_dim1 = np.random.randint(low=0, high=dim1_size+1-dim1)
-            start_dim2 = np.random.randint(low=0, high=dim2_size+1-dim2)
+            start_dim1 = np.random.randint(low=0, high=dim1_size-dim1)
+            start_dim2 = np.random.randint(low=0, high=dim2_size-dim2)
             
             patch_x = x_big[img_index, start_dim1:start_dim1 + dim1, start_dim2:start_dim2 + dim2] * rescale_factor
             patch_y = y_big[img_index, start_dim1:start_dim1 + dim1, start_dim2:start_dim2 + dim2] * rescale_factor_labels
