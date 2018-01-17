@@ -31,9 +31,9 @@ def channel_recall(channel, name):
 
 ## PROBMAP TO CONTOURS TO LABEL
 
-def probmap_to_contour(probmap):
+def probmap_to_contour(probmap, threshold = 0.5):
     # assume 2D input
-    outline = probmap >= 0.5
+    outline = probmap >= threshold
     
     return outline
 
