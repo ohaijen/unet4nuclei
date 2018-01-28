@@ -46,6 +46,6 @@ def precision_at(threshold, IOU):
     
     TP, FP, FN = np.sum(true_positives), np.sum(false_positives), np.sum(false_negatives)
     
-    prec = TP / (TP + FP + FN)
+    prec = TP / (TP + FP + FN + 1e-9)
     
     return prec
