@@ -1,4 +1,6 @@
 import numpy as np
+import os
+import os.path
 import keras.preprocessing.image
 
 import matplotlib
@@ -119,35 +121,22 @@ def single_data_from_images_1d_y(x_dir, y_dir, batch_size, bit_depth, dim1, dim2
 
 def random_sample_generator(x_big_dir, y_big_dir, batch_size, bit_depth, dim1, dim2, rescale_labels):
 
-    debug = False
     do_augmentation = True
     
-    # get images
-    x_big = skimage.io.imread_collection(x_big_dir + '*.png').concatenate()
-    print('Found',len(x_big), 'images.')
-    y_big = skimage.io.imread_collection(y_big_dir + '*.png').concatenate()
-    print('Found',len(y_big), 'annotations.')
-    
-    if(len(y_big.shape) == 3):
+    # get image names
+    image_names = os.listdir(x_big_dir)
+    print('Found',len(image_names), 'images.')
+
+    # get dimensions right -- understand data set
+    n_images = len(image_names)
+    ref_img = skimage.io.imread(os.path.join(y_big_dir, image_names[0]))
+    dim1_size = ref_img.shape[0]
+    dim2_size = ref_img.shape[1]
+
+    if(len(ref_img.shape) == 2):
         gray = True
     else:
         gray = False
-    
-    if(debug):
-        fig = plt.figure()
-        plt.hist(y_big.flatten())
-        plt.savefig('y_hist')
-        plt.close(fig)
-
-        fig = plt.figure()
-        plt.hist(x_big.flatten())
-        plt.savefig('x_hist')
-        plt.close(fig)
-    
-    # get dimensions right -- understand data set
-    n_images = x_big.shape[0]
-    dim1_size = x_big.shape[1]
-    dim2_size = x_big.shape[2]
     
     # rescale images
     rescale_factor = 1./(2**bit_depth - 1)
@@ -176,10 +165,14 @@ def random_sample_generator(x_big_dir, y_big_dir, batch_size, bit_depth, dim1, d
             # get random crop
             start_dim1 = np.random.randint(low=0, high=dim1_size-dim1)
             start_dim2 = np.random.randint(low=0, high=dim2_size-dim2)
-            
-            patch_x = x_big[img_index, start_dim1:start_dim1 + dim1, start_dim2:start_dim2 + dim2] * rescale_factor
-            patch_y = y_big[img_index, start_dim1:start_dim1 + dim1, start_dim2:start_dim2 + dim2] * rescale_factor_labels
-            
+
+            # open images
+            x_big = skimage.io.imread(os.path.join(x_big_dir, image_names[img_index]))
+            y_big = skimage.io.imread(os.path.join(y_big_dir, image_names[img_index]))
+
+            patch_x = x_big[start_dim1:start_dim1 + dim1, start_dim2:start_dim2 + dim2] * rescale_factor
+            patch_y = y_big[start_dim1:start_dim1 + dim1, start_dim2:start_dim2 + dim2] * rescale_factor_labels
+
             if(do_augmentation):
                 
                 rand_flip = np.random.randint(low=0, high=2)
@@ -203,18 +196,6 @@ def random_sample_generator(x_big_dir, y_big_dir, batch_size, bit_depth, dim1, d
             else:
                 y[i, :, :, 0:y_channels] = patch_y
             
-            if(debug):
-                fig = plt.figure()
-                plt.imshow(x[i, :, :, 0])
-                plt.colorbar()
-                plt.savefig('/home/jr0th/github/segmentation/code/generated/x_' + str(i))
-                plt.close(fig)
-
-                fig = plt.figure()
-                plt.imshow(y[i, :, :, 0])
-                plt.colorbar()
-                plt.savefig('/home/jr0th/github/segmentation/code/generated/y_' + str(i))
-                plt.close(fig)
             
         # return the buffer
         yield(x, y)
