@@ -9,6 +9,8 @@ import matplotlib.pyplot as plt
 
 import skimage.io
 
+import utils.data_augmentation
+
 
 def data_from_array(data_dir):
     
@@ -130,8 +132,6 @@ def random_sample_generator(x_big_dir, y_big_dir, batch_size, bit_depth, dim1, d
     # get dimensions right -- understand data set
     n_images = len(image_names)
     ref_img = skimage.io.imread(os.path.join(y_big_dir, image_names[0]))
-    dim1_size = ref_img.shape[0]
-    dim2_size = ref_img.shape[1]
 
     if(len(ref_img.shape) == 2):
         gray = True
@@ -162,13 +162,13 @@ def random_sample_generator(x_big_dir, y_big_dir, batch_size, bit_depth, dim1, d
             # get random image
             img_index = np.random.randint(low=0, high=n_images)
             
-            # get random crop
-            start_dim1 = np.random.randint(low=0, high=dim1_size-dim1)
-            start_dim2 = np.random.randint(low=0, high=dim2_size-dim2)
-
             # open images
             x_big = skimage.io.imread(os.path.join(x_big_dir, image_names[img_index]))
             y_big = skimage.io.imread(os.path.join(y_big_dir, image_names[img_index]))
+
+            # get random crop
+            start_dim1 = np.random.randint(low=0, high=x_big.shape[0] - dim1)
+            start_dim2 = np.random.randint(low=0, high=x_big.shape[1] - dim2)
 
             patch_x = x_big[start_dim1:start_dim1 + dim1, start_dim2:start_dim2 + dim2] * rescale_factor
             patch_y = y_big[start_dim1:start_dim1 + dim1, start_dim2:start_dim2 + dim2] * rescale_factor_labels
@@ -187,6 +187,10 @@ def random_sample_generator(x_big_dir, y_big_dir, batch_size, bit_depth, dim1, d
                 for rotate_index in range(rand_rotate):
                     patch_x = np.rot90(patch_x)
                     patch_y = np.rot90(patch_y)
+
+                # illumination
+                ifactor = 1 + np.random.uniform(-0.25, 0.25)
+                patch_x *= ifactor
                     
             # save image to buffer
             x[i, :, :, 0] = patch_x
@@ -196,6 +200,7 @@ def random_sample_generator(x_big_dir, y_big_dir, batch_size, bit_depth, dim1, d
             else:
                 y[i, :, :, 0:y_channels] = patch_y
             
-            
         # return the buffer
         yield(x, y)
+
+

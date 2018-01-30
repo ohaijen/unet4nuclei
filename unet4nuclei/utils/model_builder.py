@@ -131,13 +131,14 @@ def get_core(dim1, dim2):
     return [x, y]
 
 
-def get_model_3_class(dim1, dim2):
+def get_model_3_class(dim1, dim2, activation="softmax"):
     
     [x, y] = get_core(dim1, dim2)
 
     y = keras.layers.Convolution2D(3, 1, 1, **option_dict_conv)(y)
 
-    y = keras.layers.Activation("softmax")(y)
+    if activation is not None:
+        y = keras.layers.Activation(activation)(y)
 
     model = keras.models.Model(x, y)
     
