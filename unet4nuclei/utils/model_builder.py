@@ -13,14 +13,13 @@ def get_core(dim1, dim2):
     
     x = keras.layers.Input(shape=(dim1, dim2, 1))
 
-
     a = keras.layers.Convolution2D(64, 3, 3, **option_dict_conv)(x)  
-
     a = keras.layers.BatchNormalization(**option_dict_bn)(a)
 
     a = keras.layers.Convolution2D(64, 3, 3, **option_dict_conv)(a)
     a = keras.layers.BatchNormalization(**option_dict_bn)(a)
 
+    
     y = keras.layers.MaxPooling2D()(a)
 
     b = keras.layers.Convolution2D(128, 3, 3, **option_dict_conv)(y)
@@ -29,6 +28,7 @@ def get_core(dim1, dim2):
     b = keras.layers.Convolution2D(128, 3, 3, **option_dict_conv)(b)
     b = keras.layers.BatchNormalization(**option_dict_bn)(b)
 
+    
     y = keras.layers.MaxPooling2D()(b)
 
     c = keras.layers.Convolution2D(256, 3, 3, **option_dict_conv)(y)
@@ -37,6 +37,7 @@ def get_core(dim1, dim2):
     c = keras.layers.Convolution2D(256, 3, 3, **option_dict_conv)(c)
     c = keras.layers.BatchNormalization(**option_dict_bn)(c)
 
+    
     y = keras.layers.MaxPooling2D()(c)
 
     d = keras.layers.Convolution2D(512, 3, 3, **option_dict_conv)(y)
@@ -45,11 +46,11 @@ def get_core(dim1, dim2):
     d = keras.layers.Convolution2D(512, 3, 3, **option_dict_conv)(d)
     d = keras.layers.BatchNormalization(**option_dict_bn)(d)
 
+    
     # UP
 
     d = keras.layers.UpSampling2D()(d)
 
-    
     y = keras.layers.merge([d, c], concat_axis=3, mode="concat")
 
     e = keras.layers.Convolution2D(256, 3, 3, **option_dict_conv)(y)
