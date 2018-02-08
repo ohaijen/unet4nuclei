@@ -1,5 +1,5 @@
 import numpy as np
-from skimage.transform import PiecewiseAffineTransform, warp
+import skimage.transform
 
 def deform(image1, image2, points=10, distort=5.0):
     
@@ -17,12 +17,27 @@ def deform(image1, image2, points=10, distort=5.0):
     
     dst = np.vstack([dst_cols, dst_rows]).T
 
-    tform = PiecewiseAffineTransform()
+    tform = skimage.transform.PiecewiseAffineTransform()
     tform.estimate(src, dst)
 
     out_rows = rows 
     out_cols = cols
-    out1 = warp(image1, tform, output_shape=(out_rows, out_cols), mode="symmetric")
-    out2 = warp(image2, tform, output_shape=(out_rows, out_cols), mode="symmetric")
+    out1 = skimage.transform.warp(image1, tform, output_shape=(out_rows, out_cols), mode="symmetric")
+    out2 = skimage.transform.warp(image2, tform, output_shape=(out_rows, out_cols), mode="symmetric")
     
     return out1, out2
+
+
+def resize(x, y):
+    wf = 1 + np.random.uniform(-0.25, 0.25)
+    hf = 1 + np.random.uniform(-0.25, 0.25)
+
+    w,h = x.shape[0:2]
+
+    wt, ht = int(wf*w), int(hf*h)
+
+    new_x = skimage.transform.resize(x, (wt,ht))
+    new_y = skimage.transform.resize(y, (wt,ht))
+
+    return new_x, new_y
+

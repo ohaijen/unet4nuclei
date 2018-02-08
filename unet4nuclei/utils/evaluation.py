@@ -37,8 +37,8 @@ def precision_at(threshold, IOU):
     matches = IOU > threshold
     
     true_positives = np.sum(matches, axis=1) == 1   # Correct objects
-    false_positives = np.sum(matches, axis=0) == 0  # Missed objects
-    false_negatives = np.sum(matches, axis=1) == 0  # Extra objects
+    false_positives = np.sum(matches, axis=0) == 0  # Extra objects
+    false_negatives = np.sum(matches, axis=1) == 0  # Missed objects
     
     assert np.all(np.less_equal(true_positives, 1))
     assert np.all(np.less_equal(false_positives, 1))
@@ -46,6 +46,6 @@ def precision_at(threshold, IOU):
     
     TP, FP, FN = np.sum(true_positives), np.sum(false_positives), np.sum(false_negatives)
     
-    prec = TP / (TP + FP + FN)
+    prec = TP / (TP + FP + FN + 1e-9)
     
     return prec
