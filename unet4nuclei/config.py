@@ -1,57 +1,108 @@
-
-## 01
-## PREPROCESSING
+import os
+import utils.dirtools
 
 config_vars = {}
 
-# assume a nucleus is at least 10 by 10 pixels big
+# ************ 01 ************ #
+# ****** PREPROCESSING ******* #
+# **************************** #
+
+# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+# 01.01 INPUT DIRECTORIES AND FILES
+
+config_vars["root_directory"] = '/data1/image-segmentation/BBBC022/unet/'
+
+# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+# 01.02 DATA PARTITION INFO
+
+## Maximum number of training images (use 0 for all)
+config_vars["max_training_images"] = 75
+
+## Generate partitions?
+## If False, load predefined partitions (training.txt, validation.txt and test.txt)
+config_vars["create_split_files"] = False
+
+## Randomly choose training and validation images.
+## The remaining fraction is reserved for test images.
+config_vars["training_fraction"] = 0.5
+config_vars["validation_fraction"] = 0.25
+
+# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+# 01.03 IMAGE STORAGE OPTIONS
+
+## Transform gray scale TIF images to PNG
+config_vars["transform_images_to_PNG"] = True
+config_vars["pixel_depth"] = 8
+
+# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+# 01.04 PRE-PROCESSING OF ANNOTATIONS
+
+## Area of minimun object in pixels
 config_vars["min_nucleus_size"] = 25
 
-# Transform gray scale TIF images to PNG
-config_vars["transform_images_to_PNG"] = True
-
-# Pixels of the boundary (min 2 pixels)
+## Pixels of the boundary (min 2 pixels)
 config_vars["boundary_size"] = 2
 
-# INPUT DIRECTORIES
-config_vars["dir_root"] = '/data1/image-segmentation/BBBC022/'
+# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+# 01.05 DATA AUGMENTATION USING ELASTIC DEFORMATIONS
 
-# raw data
-config_vars["dir_raw_images"] = config_vars["dir_root"] + 'raw_images/'
-config_vars["dir_raw_annotations"] = config_vars["dir_root"] + 'new_renamed_annotations/'
-
-# Split files
-config_vars["create_split_files"] = False
-config_vars["path_files_training"] = config_vars["dir_root"] + 'training.txt'
-config_vars["path_files_validation"] = config_vars["dir_root"] + 'validation.txt'
-config_vars["path_files_test"] = config_vars["dir_root"] + 'test.txt'
-
-# Maximum number of training images (0 for all)
-config_vars["max_training_images"] = 25
-
-# Output directories
-
-## split folders
-config_vars["dir_training"] = config_vars["dir_root"] + 'unet/split_25/training/'
-config_vars["dir_validation"] = config_vars["dir_root"] + 'unet/split_25/validation/'
-config_vars["dir_test"] = config_vars["dir_root"] + 'unet/split_25/test/'
-
-## boundary output
-config_vars["dir_boundary_labels"] = config_vars["dir_root"] + 'unet/x_split_25/'
-
-## input data, normalized and 8 bit
-config_vars["dir_images_normalized_8bit"] = config_vars["dir_root"] + 'unet/y_split_25/'
-
-# Data Augmentation options (using elastic deformation)
-
-# augmentation taks lots of times but only has to be computed once 
+## Elastic deformation takes a lot of times to compute. 
+## It is computed only once in the preprocessing. 
 config_vars["augment_images"] =  False
 
-# augmentation parameters 
-config_vars["n_points"] = 16
-config_vars["distort"] = 5
+## Augmentation parameters. 
+## Calibrate parameters using the 00-elastic-deformation.ipynb
+config_vars["elastic_points"] = 16
+config_vars["elastic_distortion"] = 5
 
-# number of augmented images
-config_vars["n_augmentations"] = 10
+## Number of augmented images
+config_vars["elastic_augmentations"] = 10
 
+
+# ************ 02 ************ #
+# ********* TRAINING ********* #
+# **************************** #
+
+# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+# 02.01 OPTIMIZATION
+
+config_vars["learning_rate"] = 1e-4
+
+config_vars["epochs"] = 2
+
+config_vars["steps_per_epoch"] = 10
+
+# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+# 02.02 BATCHES
+
+config_vars["batch_size"] = 10
+
+config_vars["val_batch_size"] = 10
+
+# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+# 02.03 DATA NORMALIZATION
+
+config_vars["rescale_labels"] = True
+
+config_vars["crop_size"] = 256
+
+# ************ 03 ************ #
+# ******** PREDICTION ******** #
+# **************************** #
+
+config_vars["cell_min_size"] = 16
+
+config_vars["boundary_boost_factor"] = 1
+
+# ************ 04 ************ #
+# ******** EVALUATION ******** #
+# **************************** #
+
+config_vars["object_dilation"] = 3
+
+# **************************** #
+# ******** FINAL SETUP ******* #
+# **************************** #
+
+config_vars = utils.dirtools.setup_working_directories(config_vars)
 

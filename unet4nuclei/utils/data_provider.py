@@ -1,56 +1,46 @@
-import numpy as np
 import os
 import os.path
-import keras.preprocessing.image
-
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
+import numpy as np
 
 import skimage.io
+import keras.preprocessing.image
 
-import utils.data_augmentation
-
-
-def data_from_array(data_dir):
-    
-    # load  x
-    training_x = np.load(data_dir+"training/x.npy")
-    test_x = np.load(data_dir+"test/x.npy")
-    validation_x = np.load(data_dir+"validation/x.npy")
-
-    print(training_x.shape)
-    print(test_x.shape)
-    print(validation_x.shape)
-
-    # normalize
-    training_x = training_x / 255
-    test_x = test_x / 255
-    validation_x = validation_x / 255
-
-    # load y
-    training_y = np.load(data_dir+"training/y.npy")
-    test_y = np.load(data_dir+"test/y.npy")
-    validation_y = np.load(data_dir+"validation/y.npy")
-
-    print(training_y.shape)
-    print(test_y.shape)
-    print(validation_y.shape)
-    
-    return [training_x, training_y, validation_x, validation_y, test_x, test_y]
+import utils.augmentation
 
 
-def data_from_images(data_dir, batch_size, bit_depth, dim1, dim2):
-    
-    flow_train = single_data_from_images(data_dir + 'training/x/', data_dir + 'training/y/', batch_size, bit_depth, dim1, dim2)
-    flow_validation = single_data_from_images(data_dir + 'validation/x', data_dir + 'validation/y', batch_size, bit_depth, dim1, dim2)
-    flow_test = single_data_from_images(data_dir + 'test/x', data_dir + 'test/y', batch_size, bit_depth, dim1, dim2)
-    
-    return [flow_train, flow_validation, flow_test]
+def setup_working_directories(config_vars):
 
+    ## Expected raw data directories:
+    config_vars["raw_images_dir"] = os.path.join(config_vars["root_directory"], 'raw_images/')
+    config_vars["raw_annotations_dir"] = os.path.join(config_vars["root_directory"], 'raw_annotations/')
 
-def single_data_from_images(x_dir, y_dir, batch_size, bit_depth, dim1, dim2, rescale_labels):
+    ## Split files
+    config_vars["path_files_training"] = os.path.join(config_vars["root_directory"], 'training.txt')
+    config_vars["path_files_validation"] = os.path.join(config_vars["root_directory"], 'validation.txt')
+    config_vars["path_files_test"] = os.path.join(config_vars["root_directory"], 'test.txt')
 
+    ## Transformed data directories:
+    config_vars["normalized_images_dir"] = os.path.join(config_vars["root_directory"], 'norm_images/')
+    config_vars["boundary_labels_dir"] = os.path.join(config_vars["root_directory"], 'boundary_labels/')
+
+    return config_vars
+
+def single_data_from_images(x_dir, y_dir, image_names, batch_size, bit_depth, dim1, dim2, rescale_labels):
+
+    ## Prepare image names
+    x_image_names = [os.path.join(x_dir, f) for f in image_names]
+    y_image_names = [os.path.join(y_dir, f) for f in image_names]
+
+    ## Load all images in memory
+    x = skimage.io.imread_collection(x_image_names).concatenate()
+    y = skimage.io.imread_collection(y_image_names).concatenate()
+
+    ## Crop the desired size
+    x = x[:, 0:dim1, 0:dim2]
+    x = x.reshape(-1, dim1, dim2, 1)
+    y = y[:, 0:dim1, 0:dim2, :]
+
+    ## Setup Keras Generators
     rescale_factor = 1./(2**bit_depth - 1)
     
     if(rescale_labels):
@@ -63,20 +53,14 @@ def single_data_from_images(x_dir, y_dir, batch_size, bit_depth, dim1, dim2, res
     
     seed = 42
 
-    stream_x = gen_x.flow_from_directory(
-        x_dir,
-        target_size=(dim1,dim2),
-        color_mode='grayscale',
+    stream_x = gen_x.flow(
+        x,
         batch_size=batch_size,
-        class_mode=None,
         seed=seed
     )
-    stream_y = gen_y.flow_from_directory(
-        y_dir,
-        target_size=(dim1,dim2),
-        color_mode='rgb',
+    stream_y = gen_y.flow(
+        y,
         batch_size=batch_size,
-        class_mode=None,
         seed=seed
     )
     
@@ -85,53 +69,16 @@ def single_data_from_images(x_dir, y_dir, batch_size, bit_depth, dim1, dim2, res
     return flow
 
 
-def single_data_from_images_1d_y(x_dir, y_dir, batch_size, bit_depth, dim1, dim2, rescale_labels):
-
-    rescale_factor = 1./(2**bit_depth - 1)
-    
-    if(rescale_labels):
-        rescale_factor_labels = rescale_factor
-    else:
-        rescale_factor_labels = 1
-
-    gen_x = keras.preprocessing.image.ImageDataGenerator(rescale=rescale_factor)
-    gen_y = keras.preprocessing.image.ImageDataGenerator(rescale=rescale_factor_labels)
-    
-    seed = 42
-
-    stream_x = gen_x.flow_from_directory(
-        x_dir,
-        target_size=(dim1,dim2),
-        color_mode='grayscale',
-        batch_size=batch_size,
-        class_mode=None,
-        seed=seed
-    )
-    stream_y = gen_y.flow_from_directory(
-        y_dir,
-        target_size=(dim1,dim2),
-        color_mode='grayscale',
-        batch_size=batch_size,
-        class_mode=None,
-        seed=seed
-    )
-    
-    flow = zip(stream_x, stream_y)
-    
-    return flow
-
-
-def random_sample_generator(x_big_dir, y_big_dir, batch_size, bit_depth, dim1, dim2, rescale_labels):
+def random_sample_generator(x_dir, y_dir, image_names, batch_size, bit_depth, dim1, dim2, rescale_labels):
 
     do_augmentation = True
     
     # get image names
-    image_names = os.listdir(x_big_dir)
-    print('Found',len(image_names), 'images.')
+    print('Training with',len(image_names), 'images.')
 
     # get dimensions right -- understand data set
     n_images = len(image_names)
-    ref_img = skimage.io.imread(os.path.join(y_big_dir, image_names[0]))
+    ref_img = skimage.io.imread(os.path.join(y_dir, image_names[0]))
 
     if(len(ref_img.shape) == 2):
         gray = True
@@ -163,8 +110,8 @@ def random_sample_generator(x_big_dir, y_big_dir, batch_size, bit_depth, dim1, d
             img_index = np.random.randint(low=0, high=n_images)
             
             # open images
-            x_big = skimage.io.imread(os.path.join(x_big_dir, image_names[img_index]))
-            y_big = skimage.io.imread(os.path.join(y_big_dir, image_names[img_index]))
+            x_big = skimage.io.imread(os.path.join(x_dir, image_names[img_index]))
+            y_big = skimage.io.imread(os.path.join(y_dir, image_names[img_index]))
 
             # get random crop
             start_dim1 = np.random.randint(low=0, high=x_big.shape[0] - dim1)
