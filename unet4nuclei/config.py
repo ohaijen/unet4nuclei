@@ -10,7 +10,7 @@ config_vars = {}
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # 01.01 INPUT DIRECTORIES AND FILES
 
-config_vars["root_directory"] = '/data1/image-segmentation/BBBC022/clean/'
+config_vars["root_directory"] = '/data1/image-segmentation/BBBC022/unet/'
 
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # 01.02 DATA PARTITION INFO
@@ -94,6 +94,11 @@ config_vars["cell_min_size"] = 16
 
 config_vars["boundary_boost_factor"] = 1
 
+# ************ 04 ************ #
+# ******** EVALUATION ******** #
+# **************************** #
+
+config_vars["object_dilation"] = 3
 
 # **************************** #
 # ******** FINAL SETUP ******* #

@@ -1,6 +1,9 @@
 import numpy as np
 import skimage.transform
 
+# Based on example code from:
+# http://scikit-image.org/docs/dev/auto_examples/transform/plot_piecewise_affine.html
+
 def deform(image1, image2, points=10, distort=5.0):
     
     # create deformation grid 
