@@ -1,4 +1,5 @@
 import os
+import glob
 import random 
 
 def create_image_lists(dir_raw_images, fraction_train = 0.5, fraction_validation = 0.25):
@@ -49,7 +50,7 @@ def setup_working_directories(config_vars):
     return config_vars
 
 
-def read_data_partitions(config_vars):
+def read_data_partitions(config_vars, load_augmented=True):
     with open(config_vars["path_files_training"]) as f:
         training_files = f.read().splitlines()
         if config_vars["max_training_images"] > 0:
@@ -61,6 +62,12 @@ def read_data_partitions(config_vars):
     
     with open(config_vars["path_files_test"]) as f:
         test_files = f.read().splitlines()
+
+    # Add augmented images to the training list
+    if load_augmented:
+        files = glob.glob(config_vars["root_directory"] + "norm_images/*_aug_*.png")
+        files = [f.split("/")[-1] for f in files]
+        training_files += files
 
     partitions = {
         "training": training_files,

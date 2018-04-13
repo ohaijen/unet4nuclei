@@ -110,15 +110,19 @@ def random_sample_generator(x_dir, y_dir, image_names, batch_size, bit_depth, di
             img_index = np.random.randint(low=0, high=n_images)
             
             # open images
-            x_big = skimage.io.imread(os.path.join(x_dir, image_names[img_index]))
-            y_big = skimage.io.imread(os.path.join(y_dir, image_names[img_index]))
+            x_big = skimage.io.imread(os.path.join(x_dir, image_names[img_index])) * rescale_factor
+            y_big = skimage.io.imread(os.path.join(y_dir, image_names[img_index])) * rescale_factor_labels
+
+            # resizing
+            #x_big, y_big = utils.augmentation.resize(patch_x, patch_y)
+
 
             # get random crop
             start_dim1 = np.random.randint(low=0, high=x_big.shape[0] - dim1)
             start_dim2 = np.random.randint(low=0, high=x_big.shape[1] - dim2)
 
-            patch_x = x_big[start_dim1:start_dim1 + dim1, start_dim2:start_dim2 + dim2] * rescale_factor
-            patch_y = y_big[start_dim1:start_dim1 + dim1, start_dim2:start_dim2 + dim2] * rescale_factor_labels
+            patch_x = x_big[start_dim1:start_dim1 + dim1, start_dim2:start_dim2 + dim2] #* rescale_factor
+            patch_y = y_big[start_dim1:start_dim1 + dim1, start_dim2:start_dim2 + dim2] #* rescale_factor_labels
 
             if(do_augmentation):
                 
@@ -136,7 +140,7 @@ def random_sample_generator(x_dir, y_dir, image_names, batch_size, bit_depth, di
                     patch_y = np.rot90(patch_y)
 
                 # illumination
-                ifactor = 1 + np.random.uniform(-0.25, 0.25)
+                ifactor = 1 + np.random.uniform(-0.75, 0.75)
                 patch_x *= ifactor
                     
             # save image to buffer

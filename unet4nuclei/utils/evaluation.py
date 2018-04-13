@@ -47,7 +47,7 @@ def precision_at(threshold, IOU):
     
     TP, FP, FN = np.sum(true_positives), np.sum(false_positives), np.sum(false_negatives)
     
-    prec = TP / (TP + FP + FN + 1e-9)
+    prec = 2*TP / (2*TP + FP + FN + 1e-9)
     
     return prec
 
@@ -101,7 +101,7 @@ def get_splits_and_merges(ground_truth, prediction, results, image_name):
     # Compute IoU
     IOU = intersection_over_union(ground_truth, prediction)
     
-    matches = IOU > 0.3
+    matches = IOU > 0.1
     merges = np.sum(matches, axis=0) > 1
     splits = np.sum(matches, axis=1) > 1
     r = {"Image_Name":image_name, "Merges":np.sum(merges), "Splits":np.sum(splits)}

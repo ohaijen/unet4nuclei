@@ -16,7 +16,7 @@ config_vars["root_directory"] = '/data1/image-segmentation/BBBC022/unet/'
 # 01.02 DATA PARTITION INFO
 
 ## Maximum number of training images (use 0 for all)
-config_vars["max_training_images"] = 75
+config_vars["max_training_images"] = 0
 
 ## Generate partitions?
 ## If False, load predefined partitions (training.txt, validation.txt and test.txt)
@@ -68,9 +68,9 @@ config_vars["elastic_augmentations"] = 10
 
 config_vars["learning_rate"] = 1e-4
 
-config_vars["epochs"] = 2
+config_vars["epochs"] = 15
 
-config_vars["steps_per_epoch"] = 10
+config_vars["steps_per_epoch"] = 500
 
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # 02.02 BATCHES
