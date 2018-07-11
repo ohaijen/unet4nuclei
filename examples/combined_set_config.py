@@ -10,7 +10,7 @@ config_vars = {}
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # 01.01 INPUT DIRECTORIES AND FILES
 
-config_vars["root_directory"] = '/data1/image-segmentation/BBBC022/unet/'
+config_vars["root_directory"] = '/data1/image-segmentation/combined_set/'
 
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # 01.02 DATA PARTITION INFO
@@ -48,7 +48,7 @@ config_vars["boundary_size"] = 2
 
 ## Elastic deformation takes a lot of times to compute. 
 ## It is computed only once in the preprocessing. 
-config_vars["augment_images"] =  False
+config_vars["augment_images"] =  True
 
 ## Augmentation parameters. 
 ## Calibrate parameters using the 00-elastic-deformation.ipynb
@@ -68,7 +68,7 @@ config_vars["elastic_augmentations"] = 10
 
 config_vars["learning_rate"] = 1e-4
 
-config_vars["epochs"] = 15
+config_vars["epochs"] = 50
 
 config_vars["steps_per_epoch"] = 500
 
