@@ -33,7 +33,7 @@ def intersection_over_union(ground_truth, prediction):
     
 
 
-def precision_at(threshold, IOU):
+def measures_at(threshold, IOU):
     
     matches = IOU > threshold
     
@@ -47,21 +47,25 @@ def precision_at(threshold, IOU):
     
     TP, FP, FN = np.sum(true_positives), np.sum(false_positives), np.sum(false_negatives)
     
-    prec = 2*TP / (2*TP + FP + FN + 1e-9)
+    f1 = 2*TP / (2*TP + FP + FN + 1e-9)
     
-    return prec
+    return f1, TP, FP, FN
 
 # Compute Average Precision for all IoU thresholds
 
-def compute_ap_results(ground_truth, prediction, results, image_name):
+def compute_af1_results(ground_truth, prediction, results, image_name):
 
     # Compute IoU
     IOU = intersection_over_union(ground_truth, prediction)
+    if IOU.shape[0] > 0:
+        jaccard = np.max(IOU, axis=0).mean()
+    else:
+        jaccard = 0.0
     
-    # Calculate precision at all thresholds
+    # Calculate F1 score at all thresholds
     for t in np.arange(0.5, 1.0, 0.05):
-        p = precision_at(t, IOU)
-        res = {"Image": image_name, "Threshold": t, "Precision": p}
+        f1, tp, fp, fn = measures_at(t, IOU)
+        res = {"Image": image_name, "Threshold": t, "F1": f1, "Jaccard": jaccard, "TP": tp, "FP": fp, "FN": fn}
         row = len(results)
         results.loc[row] = res
         

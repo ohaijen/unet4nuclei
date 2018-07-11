@@ -67,7 +67,13 @@ def read_data_partitions(config_vars, load_augmented=True):
     if load_augmented:
         files = glob.glob(config_vars["root_directory"] + "norm_images/*_aug_*.png")
         files = [f.split("/")[-1] for f in files]
-        training_files += files
+        if config_vars["max_training_images"] > 0:
+            augmented = []
+            for trf in training_files:
+                augmented += [f for f in files if f.startswith(trf.split(".")[0])]
+            training_files += augmented
+        else:
+            training_files += files
 
     partitions = {
         "training": training_files,
