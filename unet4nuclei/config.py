@@ -10,7 +10,7 @@ config_vars = {}
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # 01.01 INPUT DIRECTORIES AND FILES
 
-config_vars["root_directory"] = '/data1/image-segmentation/BBBC022/unet/'
+config_vars["root_directory"] = '/home/santient/Data/BBBC039/'
 
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # 01.02 DATA PARTITION INFO
