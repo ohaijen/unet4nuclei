@@ -27,6 +27,8 @@ import utils.model_builder
 # # Configuration
 PI = 3.1415926539
 HALF_SIDE = 96 # pixels
+SAVE_OUTPUT = "locations"
+IMG_EXT = ".tif"
 
 from config import config_vars
 
@@ -46,7 +48,7 @@ config_vars = utils.dirtools.setup_experiment(config_vars, experiment_name)
 # Configuration to run on GPU
 configuration = tf.ConfigProto()
 configuration.gpu_options.allow_growth = True
-configuration.gpu_options.visible_device_list = "1"
+configuration.gpu_options.visible_device_list = "0"
 
 session = tf.Session(config = configuration)
 
@@ -67,7 +69,7 @@ model.summary()
 # # Load images and run predictions
 
 total_num_images = len(image_list)
-batch_size = 3
+batch_size = 1
 
 i = 0
 while i < total_num_images:
@@ -77,7 +79,7 @@ while i < total_num_images:
     else:
         batch_size = total_num_images - i
         i += batch_size
-    print("Image",i)
+    print("Image",batch[0])
 
     image_names = [input_dir + b for b in batch]
     imagebuffer = skimage.io.imread_collection(image_names)
@@ -85,7 +87,7 @@ while i < total_num_images:
     images = images.reshape((-1, dim1, dim2, 1))
 
     # preprocess (assuming images are encoded as 8-bits in the preprocessing step)
-    images = images / 255
+    images = images / np.max(images)
 
     # Normal prediction time
     predictions = model.predict(images, batch_size=batch_size)
@@ -108,12 +110,12 @@ while i < total_num_images:
             label = skimage.morphology.erosion(label, struct)
     
         label = label.astype(np.int16)
-        if save_output == "masks" or save_output == "both":
+        if SAVE_OUTPUT == "masks" or SAVE_OUTPUT == "both":
             skimage.io.imsave(filename, label)
 
         # Save object properties
-        if save_output == "locations" or save_output == "both":
-            filename = input_dir + batch[j].replace(".png",".csv")
+        if SAVE_OUTPUT == "locations" or SAVE_OUTPUT == "both":
+            filename = output_dir + batch[j].replace(IMG_EXT,".csv")
             os.makedirs("/".join(filename.split("/")[0:-1]), exist_ok=True)
             nuclei_df = pd.DataFrame(columns=["Nuclei_Location_Center_X","Nuclei_Location_Center_Y","Orientation"])
             regions = skimage.measure.regionprops(label)
