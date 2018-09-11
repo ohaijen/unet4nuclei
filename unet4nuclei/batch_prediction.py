@@ -69,6 +69,7 @@ model.summary()
 # # Load images and run predictions
 
 total_num_images = len(image_list)
+# The current logic of the code breaks if batch_size > 1
 batch_size = 1
 
 i = 0
@@ -79,15 +80,14 @@ while i < total_num_images:
     else:
         batch_size = total_num_images - i
         i += batch_size
-    print("Image",batch[0])
 
     image_names = [input_dir + b for b in batch]
     imagebuffer = skimage.io.imread_collection(image_names)
     images = imagebuffer.concatenate()
     images = images.reshape((-1, dim1, dim2, 1))
 
-    # preprocess (assuming images are encoded as 8-bits in the preprocessing step)
-    images = images / np.max(images)
+    # Normalize pixels
+    images = images / np.max(np.max(np.max(images, axis=-1), axis=-1), axis=-1)
 
     # Normal prediction time
     predictions = model.predict(images, batch_size=batch_size)
@@ -95,7 +95,14 @@ while i < total_num_images:
     # # Transform predictions to label matrices
 
     for j in range(len(batch)):
-        filename = output_dir + batch[j]
+        # Determine whether the image has been processed before
+        filename = output_dir + batch[j].replace(IMG_EXT,".csv")
+        if os.path.isfile(filename):
+            print("Image", batch[j], "already done")
+            continue
+
+        print("Image",batch[j])
+
         os.makedirs("/".join(filename.split("/")[0:-1]), exist_ok=True)
         probmap = predictions[j].squeeze()
         pred = utils.metrics.probmap_to_pred(probmap, config_vars["boundary_boost_factor"])
@@ -115,7 +122,6 @@ while i < total_num_images:
 
         # Save object properties
         if SAVE_OUTPUT == "locations" or SAVE_OUTPUT == "both":
-            filename = output_dir + batch[j].replace(IMG_EXT,".csv")
             os.makedirs("/".join(filename.split("/")[0:-1]), exist_ok=True)
             nuclei_df = pd.DataFrame(columns=["Nuclei_Location_Center_X","Nuclei_Location_Center_Y","Orientation"])
             regions = skimage.measure.regionprops(label)
