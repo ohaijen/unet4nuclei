@@ -87,7 +87,7 @@ while i < total_num_images:
     missing = [k for k in range(len(image_names)) if not os.path.isfile(image_names[k])]
 
     # Check that images have not been processed
-    outfiles = [b.replace(input_dir, output_dir).replace(IMG_EXT,".csv") for b image_names]
+    outfiles = [b.replace(input_dir, output_dir).replace(IMG_EXT,".csv") for b in image_names]
     already_done = [k for k in range(len(outfiles)) if not os.path.isfile(outfiles[k])]
 
     # Filter images missing and done
