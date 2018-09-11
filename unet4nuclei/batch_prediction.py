@@ -82,6 +82,31 @@ while i < total_num_images:
         i += batch_size
 
     image_names = [input_dir + b for b in batch]
+
+    # Check that images exist
+    missing = [k for k in range(len(image_names)) if not os.path.isfile(image_names[k])]
+
+    # Check that images have not been processed
+    outfiles = [b.replace(input_dir, output_dir).replace(IMG_EXT,".csv") for b image_names]
+    already_done = [k for k in range(len(outfiles)) if not os.path.isfile(outfiles[k])]
+
+    # Filter images missing and done
+    good_to_go = []
+    for j in range(len(batch)):
+        if j in missing:
+            print("Image missing:", batch[j])
+        elif j in already_done:
+            print("Already done:", batch[j])
+        else:
+            good_to_go.append(j)
+
+    image_names = [image_names[k] for k in good_to_go]
+    batch = [batch[k] for k in good_to_go]
+
+    if len(batch) == 0:
+        continue
+
+    # Load images
     imagebuffer = skimage.io.imread_collection(image_names)
     images = imagebuffer.concatenate()
     images = images.reshape((-1, dim1, dim2, 1))
@@ -90,7 +115,7 @@ while i < total_num_images:
     images = images / np.max(np.max(np.max(images, axis=-1), axis=-1), axis=-1)
 
     # Normal prediction time
-    predictions = model.predict(images, batch_size=batch_size)
+    predictions = model.predict(images, batch_size=len(batch))
 
     # # Transform predictions to label matrices
 
