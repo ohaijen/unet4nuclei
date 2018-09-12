@@ -66,6 +66,8 @@ model = utils.model_builder.get_model_3_class(dim1, dim2)
 model.load_weights(config_vars["model_file"])
 model.summary()
 
+# 
+
 # # Load images and run predictions
 
 total_num_images = len(image_list)
@@ -88,7 +90,7 @@ while i < total_num_images:
 
     # Check that images have not been processed
     outfiles = [b.replace(input_dir, output_dir).replace(IMG_EXT,".csv") for b in image_names]
-    already_done = [k for k in range(len(outfiles)) if not os.path.isfile(outfiles[k])]
+    already_done = [k for k in range(len(outfiles)) if os.path.isfile(outfiles[k])]
 
     # Filter images missing and done
     good_to_go = []
