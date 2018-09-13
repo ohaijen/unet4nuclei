@@ -74,6 +74,21 @@ total_num_images = len(image_list)
 # The current logic of the code breaks if batch_size > 1
 batch_size = 1
 
+
+# Check that images have not been processed before
+image_list["Done"] = False
+for k,r in image_list.iterrows():
+    img_name = image_list.loc[k,"DNA"]
+    outfile = output_dir + img_name.replace(IMG_EXT, ".csv")
+    if os.path.isfile(outfile):
+        image_list.loc[k,"Done"] = True
+
+print(image_list.shape)
+image_list = image_list[~image_list["Done"]]
+print(image_list.shape)
+
+sys.exit()
+
 i = 0
 while i < total_num_images:
     batch = image_list.loc[i:i+batch_size-1, "DNA"].values
