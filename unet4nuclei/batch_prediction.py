@@ -76,6 +76,7 @@ batch_size = 1
 
 
 # Check that images have not been processed before
+print("Verifying image list")
 image_list["Done"] = False
 for k,r in image_list.iterrows():
     img_name = image_list.loc[k,"DNA"]
@@ -83,11 +84,10 @@ for k,r in image_list.iterrows():
     if os.path.isfile(outfile):
         image_list.loc[k,"Done"] = True
 
-print(image_list.shape)
+print("Total images:",image_list.shape[0])
 image_list = image_list[~image_list["Done"]]
-print(image_list.shape)
+print("Pending processing:", image_list.shape[0])
 
-sys.exit()
 
 i = 0
 while i < total_num_images:
@@ -103,17 +103,11 @@ while i < total_num_images:
     # Check that images exist
     missing = [k for k in range(len(image_names)) if not os.path.isfile(image_names[k])]
 
-    # Check that images have not been processed
-    outfiles = [b.replace(input_dir, output_dir).replace(IMG_EXT,".csv") for b in image_names]
-    already_done = [k for k in range(len(outfiles)) if os.path.isfile(outfiles[k])]
-
-    # Filter images missing and done
+    # Filter images missing
     good_to_go = []
     for j in range(len(batch)):
         if j in missing:
             print("Image missing:", batch[j])
-        elif j in already_done:
-            print("Already done:", batch[j])
         else:
             good_to_go.append(j)
 
