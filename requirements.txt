@@ -1,0 +1,5 @@
+numpy==1.15.4
+pathlib2==2.3.3
+scikit-image==0.14.1
+tensorflow==1.13.1
+tqdm==4.28.1
